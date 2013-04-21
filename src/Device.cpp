@@ -13,7 +13,8 @@ namespace Frida
 
   Device::Device (FridaDevice * handle, Dispatcher ^ dispatcher)
     : handle (handle),
-      dispatcher (dispatcher)
+      dispatcher (dispatcher),
+      icon (nullptr)
   {
     Application::ref ();
 
@@ -27,6 +28,11 @@ namespace Frida
     if (handle == NULL)
       return;
 
+    if (icon != nullptr)
+    {
+      delete icon;
+      icon = nullptr;
+    }
     g_signal_handlers_disconnect_by_func (handle, OnDeviceLost, selfHandle);
     delete selfHandle;
     selfHandle = NULL;
@@ -61,12 +67,33 @@ namespace Frida
     return Marshal::UTF8CStringToClrString (frida_device_get_name (handle));
   }
 
-  String ^
-  Device::Kind::get ()
+  ImageSource ^
+  Device::Icon::get ()
   {
     if (handle == NULL)
       throw gcnew ObjectDisposedException ("Device");
-    return Marshal::UTF8CStringToClrString (frida_device_get_kind (handle));
+    if (icon == nullptr)
+      icon = Marshal::FridaIconToImageSource (frida_device_get_icon (handle));
+    return icon;
+  }
+
+  DeviceType ^
+  Device::Type::get ()
+  {
+    if (handle == NULL)
+      throw gcnew ObjectDisposedException ("Device");
+
+    switch (frida_device_get_dtype (handle))
+    {
+      case FRIDA_DEVICE_TYPE_LOCAL:
+        return DeviceType::Local;
+      case FRIDA_DEVICE_TYPE_TETHER:
+        return DeviceType::Tether;
+      case FRIDA_DEVICE_TYPE_REMOTE:
+        return DeviceType::Remote;
+      default:
+        g_assert_not_reached ();
+    }
   }
 
   array<Process ^> ^
@@ -134,7 +161,7 @@ namespace Frida
   {
     if (handle == NULL)
       throw gcnew ObjectDisposedException ("Device");
-    return String::Format ("Id: {0}, Name: \"{1}\", Kind: '{2}'", Id, Name, Kind);
+    return String::Format ("Id: {0}, Name: \"{1}\", Type: '{2}'", Id, Name, Type);
   }
 
   void

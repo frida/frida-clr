@@ -1,17 +1,26 @@
 #pragma once
 
+#using <PresentationCore.dll>
 #using <WindowsBase.dll>
 
 #include <frida-core.h>
 #include <msclr/gcroot.h>
 
 using namespace System;
+using namespace System::Windows::Media;
 using System::Windows::Threading::Dispatcher;
 
 namespace Frida
 {
   ref class Process;
   ref class Session;
+
+  public enum class DeviceType
+  {
+    Local,
+    Tether,
+    Remote
+  };
 
   public ref class Device
   {
@@ -27,7 +36,8 @@ namespace Frida
 
     property unsigned int Id { unsigned int get (); }
     property String ^ Name { String ^ get (); }
-    property String ^ Kind { String ^ get (); }
+    property ImageSource ^ Icon { ImageSource ^ get (); }
+    property DeviceType ^ Type { DeviceType ^ get (); }
 
     array<Process ^> ^ EnumerateProcesses ();
     unsigned int Spawn (String ^ path, array<String ^> ^ argv, array<String ^> ^ envp);
@@ -44,6 +54,7 @@ namespace Frida
     msclr::gcroot<Device ^> * selfHandle;
 
     Dispatcher ^ dispatcher;
+    ImageSource ^ icon;
     EventHandler ^ onLostHandler;
   };
 }

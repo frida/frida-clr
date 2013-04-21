@@ -29,5 +29,8 @@ namespace Frida
 
   private:
     FridaProcess * handle;
+
+    ImageSource ^ smallIcon;
+    ImageSource ^ largeIcon;
   };
 }
