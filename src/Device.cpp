@@ -77,7 +77,7 @@ namespace Frida
     return icon;
   }
 
-  DeviceType ^
+  DeviceType
   Device::Type::get ()
   {
     if (handle == NULL)
