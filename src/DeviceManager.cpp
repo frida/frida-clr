@@ -1,8 +1,8 @@
 #include "DeviceManager.hpp"
 
-#include "Application.hpp"
 #include "Device.hpp"
 #include "Marshal.hpp"
+#include "Runtime.hpp"
 
 using System::Windows::Threading::DispatcherPriority;
 
@@ -13,7 +13,7 @@ namespace Frida
   DeviceManager::DeviceManager (Dispatcher ^ dispatcher)
     : dispatcher (dispatcher)
   {
-    Application::ref ();
+    Runtime::Ref ();
 
     handle = frida_device_manager_new ();
 
@@ -42,7 +42,7 @@ namespace Frida
       g_object_unref (handle);
       handle = NULL;
 
-      Application::unref ();
+      Runtime::Unref ();
     }
   }
 

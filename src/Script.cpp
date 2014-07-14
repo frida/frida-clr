@@ -1,7 +1,7 @@
 #include "Script.hpp"
 
-#include "Application.hpp"
 #include "Marshal.hpp"
+#include "Runtime.hpp"
 
 using System::Windows::Threading::DispatcherPriority;
 
@@ -13,7 +13,7 @@ namespace Frida
     : handle (handle),
       dispatcher (dispatcher)
   {
-    Application::ref ();
+    Runtime::Ref ();
 
     selfHandle = new msclr::gcroot<Script ^> (this);
     onMessageHandler = gcnew ScriptMessageHandler (this, &Script::OnMessage);
@@ -39,7 +39,7 @@ namespace Frida
       g_object_unref (handle);
       handle = NULL;
 
-      Application::unref ();
+      Runtime::Unref ();
     }
   }
 

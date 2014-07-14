@@ -1,8 +1,8 @@
 #include "Device.hpp"
 
-#include "Application.hpp"
 #include "Marshal.hpp"
 #include "Process.hpp"
+#include "Runtime.hpp"
 #include "Session.hpp"
 
 using System::Windows::Threading::DispatcherPriority;
@@ -16,7 +16,7 @@ namespace Frida
       dispatcher (dispatcher),
       icon (nullptr)
   {
-    Application::ref ();
+    Runtime::Ref ();
 
     selfHandle = new msclr::gcroot<Device ^> (this);
     onLostHandler = gcnew EventHandler (this, &Device::OnLost);
@@ -47,7 +47,7 @@ namespace Frida
       g_object_unref (handle);
       handle = NULL;
 
-      Application::unref ();
+      Runtime::Unref ();
     }
   }
 

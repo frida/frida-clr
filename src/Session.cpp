@@ -1,7 +1,7 @@
 #include "Session.hpp"
 
-#include "Application.hpp"
 #include "Marshal.hpp"
+#include "Runtime.hpp"
 #include "Script.hpp"
 
 using System::Windows::Threading::DispatcherPriority;
@@ -14,7 +14,7 @@ namespace Frida
     : handle (handle),
       dispatcher (dispatcher)
   {
-    Application::ref ();
+    Runtime::Ref ();
 
     selfHandle = new msclr::gcroot<Session ^> (this);
     onDetachedHandler = gcnew EventHandler (this, &Session::OnDetached);
@@ -40,7 +40,7 @@ namespace Frida
       g_object_unref (handle);
       handle = NULL;
 
-      Application::unref ();
+      Runtime::Unref ();
     }
   }
 

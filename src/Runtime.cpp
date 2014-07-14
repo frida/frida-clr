@@ -1,21 +1,25 @@
-#include "Application.hpp"
+#include "Runtime.hpp"
 
 #include <frida-core.h>
 
 namespace Frida
 {
-  volatile int Application::refCount = 0;
+  volatile int Runtime::refCount = 0;
 
-  void Application::ref ()
+  void Runtime::Ref ()
   {
     g_atomic_int_inc (&refCount);
+    glib_init ();
     frida_init ();
   }
 
-  void Application::unref ()
+  void Runtime::Unref ()
   {
     if (g_atomic_int_dec_and_test (&refCount))
+    {
       frida_deinit ();
+      glib_deinit ();
+    }
   }
 
   class Assembly
@@ -23,12 +27,12 @@ namespace Frida
   public:
     Assembly ()
     {
-      Application::ref ();
+      Runtime::Ref ();
     }
 
     ~Assembly ()
     {
-      Application::unref ();
+      Runtime::Unref ();
     }
   };
   static Assembly assembly;

@@ -2,11 +2,11 @@
 
 namespace Frida
 {
-  class Application
+  class Runtime
   {
   public:
-    static void ref ();
-    static void unref ();
+    static void Ref ();
+    static void Unref ();
 
   private:
     static volatile int refCount;

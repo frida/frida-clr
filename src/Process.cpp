@@ -1,7 +1,7 @@
 #include "Process.hpp"
 
-#include "Application.hpp"
 #include "Marshal.hpp"
+#include "Runtime.hpp"
 
 namespace Frida
 {
@@ -10,7 +10,7 @@ namespace Frida
       smallIcon (nullptr),
       largeIcon (nullptr)
   {
-    Application::ref ();
+    Runtime::Ref ();
   }
 
   Process::~Process ()
@@ -39,7 +39,7 @@ namespace Frida
       g_object_unref (handle);
       handle = NULL;
 
-      Application::unref ();
+      Runtime::Unref ();
     }
   }
 
