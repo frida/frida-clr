@@ -9,7 +9,6 @@ namespace Frida
   void Runtime::Ref ()
   {
     g_atomic_int_inc (&refCount);
-    glib_init ();
     frida_init ();
   }
 
@@ -18,7 +17,6 @@ namespace Frida
     if (g_atomic_int_dec_and_test (&refCount))
     {
       frida_deinit ();
-      glib_deinit ();
     }
   }
 
