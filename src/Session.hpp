@@ -27,7 +27,7 @@ namespace Frida
     property unsigned int Pid { unsigned int get (); }
 
     void Detach ();
-    Script ^ CreateScript (String ^ source);
+    Script ^ CreateScript (String ^ name, String ^ source);
 
   internal:
     void OnDetached (Object ^ sender, EventArgs ^ e);
