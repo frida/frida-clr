@@ -78,6 +78,28 @@ namespace Frida
   }
 
   void
+  Session::EnableDebugger (UInt16 port)
+  {
+    if (handle == NULL)
+      throw gcnew ObjectDisposedException ("Session");
+
+    GError * error = NULL;
+    frida_session_enable_debugger_sync (handle, port, &error);
+    Marshal::ThrowGErrorIfSet (&error);
+  }
+
+  void
+  Session::DisableDebugger ()
+  {
+    if (handle == NULL)
+      throw gcnew ObjectDisposedException ("Session");
+
+    GError * error = NULL;
+    frida_session_disable_debugger_sync (handle, &error);
+    Marshal::ThrowGErrorIfSet (&error);
+  }
+
+  void
   Session::OnDetached (Object ^ sender, EventArgs ^ e)
   {
     if (dispatcher->CheckAccess ())

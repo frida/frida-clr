@@ -28,6 +28,8 @@ namespace Frida
 
     void Detach ();
     Script ^ CreateScript (String ^ name, String ^ source);
+    void EnableDebugger (UInt16 port);
+    void DisableDebugger ();
 
   internal:
     void OnDetached (Object ^ sender, EventArgs ^ e);
