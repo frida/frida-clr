@@ -51,12 +51,12 @@ namespace Frida
     }
   }
 
-  unsigned int
+  String ^
   Device::Id::get ()
   {
     if (handle == NULL)
       throw gcnew ObjectDisposedException ("Device");
-    return frida_device_get_id (handle);
+    return Marshal::UTF8CStringToClrString (frida_device_get_id (handle));
   }
 
   String ^
@@ -161,7 +161,7 @@ namespace Frida
   {
     if (handle == NULL)
       throw gcnew ObjectDisposedException ("Device");
-    return String::Format ("Id: {0}, Name: \"{1}\", Type: '{2}'", Id, Name, Type);
+    return String::Format ("Id: \"{0}\", Name: \"{1}\", Type: {2}", Id, Name, Type);
   }
 
   void

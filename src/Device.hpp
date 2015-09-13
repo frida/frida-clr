@@ -34,7 +34,7 @@ namespace Frida
   public:
     event EventHandler ^ Lost;
 
-    property unsigned int Id { unsigned int get (); }
+    property String ^ Id { String ^ get (); }
     property String ^ Name { String ^ get (); }
     property ImageSource ^ Icon { ImageSource ^ get (); }
     property DeviceType Type { DeviceType get (); }
