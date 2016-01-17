@@ -32,6 +32,7 @@ namespace Frida
     void EnableDebugger ();
     void EnableDebugger (UInt16 port);
     void DisableDebugger ();
+    void DisableJit ();
 
   internal:
     void OnDetached (Object ^ sender, EventArgs ^ e);
