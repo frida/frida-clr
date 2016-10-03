@@ -262,7 +262,7 @@ namespace HelloFrida
         {
             try
             {
-                script.PostMessage("{\"type\":\"banana\"}");
+                script.Post("{\"type\":\"banana\"}");
             }
             catch (Exception ex)
             {
