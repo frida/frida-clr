@@ -28,11 +28,8 @@ namespace Frida
     if (handle == NULL)
       return;
 
-    if (icon != nullptr)
-    {
-      delete icon;
-      icon = nullptr;
-    }
+    delete icon;
+    icon = nullptr;
     g_signal_handlers_disconnect_by_func (handle, OnDeviceLost, selfHandle);
     delete selfHandle;
     selfHandle = NULL;
