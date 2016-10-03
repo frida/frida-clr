@@ -40,14 +40,25 @@ namespace Frida
   }
 
   array<unsigned char> ^
-  Marshal::ByteArrayToClrArray (const guint8 * data, gint length)
+  Marshal::BytesToClrArray (GBytes * bytes)
   {
-    if (length == 0)
+    if (bytes == NULL)
       return nullptr;
-    array<unsigned char> ^ result = gcnew array<unsigned char> (length);
-    pin_ptr<byte> resultStart = &result[0];
-    memcpy (resultStart, data, length);
+    gsize size;
+    gconstpointer data = g_bytes_get_data (bytes, &size);
+    array<unsigned char> ^ result = gcnew array<unsigned char> (size);
+    pin_ptr<unsigned char> resultStart = &result[0];
+    memcpy (resultStart, data, size);
     return result;
+  }
+
+  GBytes *
+  Marshal::ClrByteArrayToBytes (array<unsigned char> ^ arr)
+  {
+    if (arr == nullptr)
+      return NULL;
+    pin_ptr<unsigned char> arrStart = &arr[0];
+    return g_bytes_new (arrStart, arr->Length);
   }
 
   ImageSource ^
@@ -59,10 +70,10 @@ namespace Frida
     gint width = frida_icon_get_width (icon);
     gint height = frida_icon_get_height (icon);
     gint rowstride = frida_icon_get_rowstride (icon);
-    gint pixelsLength;
-    guint8 * pixelsRgba = frida_icon_get_pixels (icon, &pixelsLength);
+    gsize pixelsSize;
+    guint8 * pixelsRgba = static_cast<guint8 *> (const_cast<gpointer> (g_bytes_get_data (frida_icon_get_pixels (icon), &pixelsSize)));
 
-    guint8 * pixelsBgra = static_cast<guint8 *> (g_memdup (pixelsRgba, pixelsLength));
+    guint8 * pixelsBgra = static_cast<guint8 *> (g_memdup (pixelsRgba, pixelsSize));
     guint8 * rowStart = pixelsBgra;
     for (gint row = 0; row != height; row++)
     {
@@ -80,7 +91,7 @@ namespace Frida
     }
 
     WriteableBitmap ^ bitmap = gcnew WriteableBitmap (width, height, 96, 96, PixelFormats::Pbgra32, nullptr);
-    bitmap->WritePixels (Int32Rect (0, 0, width, height), IntPtr (pixelsBgra), pixelsLength, rowstride, 0, 0);
+    bitmap->WritePixels (Int32Rect (0, 0, width, height), IntPtr (pixelsBgra), pixelsSize, rowstride, 0, 0);
 
     g_free (pixelsBgra);
 

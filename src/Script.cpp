@@ -7,7 +7,7 @@ using System::Windows::Threading::DispatcherPriority;
 
 namespace Frida
 {
-  static void OnScriptMessage (FridaScript * script, const gchar * message, const guint8 * data, gint data_length, gpointer user_data);
+  static void OnScriptMessage (FridaScript * script, const gchar * message, GBytes * data, gpointer user_data);
 
   Script::Script (FridaScript * handle, Dispatcher ^ dispatcher)
     : handle (handle),
@@ -66,14 +66,22 @@ namespace Frida
   }
 
   void
-  Script::PostMessage (String ^ message)
+  Script::Post (String ^ message)
+  {
+    PostWithData (message, nullptr);
+  }
+
+  void
+  Script::PostWithData (String ^ message, array<unsigned char> ^ data)
   {
     if (handle == NULL)
       throw gcnew ObjectDisposedException ("Script");
 
     GError * error = NULL;
     gchar * messageUtf8 = Marshal::ClrStringToUTF8CString (message);
-    frida_script_post_message_sync (handle, messageUtf8, &error);
+    GBytes * dataBytes = Marshal::ClrByteArrayToBytes (data);
+    frida_script_post_sync (handle, messageUtf8, dataBytes, &error);
+    g_bytes_unref (dataBytes);
     g_free (messageUtf8);
     Marshal::ThrowGErrorIfSet (&error);
   }
@@ -88,14 +96,14 @@ namespace Frida
   }
 
   static void
-  OnScriptMessage (FridaScript * script, const gchar * message, const guint8 * data, gint data_length, gpointer user_data)
+  OnScriptMessage (FridaScript * script, const gchar * message, GBytes * data, gpointer user_data)
   {
     (void) script;
 
     msclr::gcroot<Script ^> * wrapper = static_cast<msclr::gcroot<Script ^> *> (user_data);
     ScriptMessageEventArgs ^ e = gcnew ScriptMessageEventArgs (
         Marshal::UTF8CStringToClrString (message),
-        Marshal::ByteArrayToClrArray (data, data_length));
+        Marshal::BytesToClrArray (data));
    (*wrapper)->OnMessage (*wrapper, e);
   }
 }

@@ -13,7 +13,8 @@ namespace Frida
     static System::String ^ UTF8CStringToClrString (const char * str);
     static char * ClrStringToUTF8CString (System::String ^ str);
     static gchar ** ClrStringArrayToUTF8CStringVector (array<System::String ^> ^ arr);
-    static array<unsigned char> ^ ByteArrayToClrArray (const guint8 * data, gint length);
+    static array<unsigned char> ^ BytesToClrArray (GBytes * bytes);
+    static GBytes * ClrByteArrayToBytes (array<unsigned char> ^ arr);
     static System::Windows::Media::ImageSource ^ Marshal::FridaIconToImageSource (FridaIcon * icon);
 
     static void ThrowGErrorIfSet (GError ** error);

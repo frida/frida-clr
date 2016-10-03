@@ -27,7 +27,8 @@ namespace Frida
 
     void Load ();
     void Unload ();
-    void PostMessage (String ^ message);
+    void Post (String ^ message);
+    void PostWithData (String ^ message, array<unsigned char> ^ data);
 
   internal:
     void OnMessage (Object ^ sender, ScriptMessageEventArgs ^ e);
