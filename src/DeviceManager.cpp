@@ -60,6 +60,9 @@ namespace Frida
     array<Device ^> ^ devices = gcnew array<Device ^> (result_length);
     for (gint i = 0; i != result_length; i++)
       devices[i] = gcnew Device (frida_device_list_get (result, i), dispatcher);
+
+    g_object_unref (result);
+
     return devices;
   }
 

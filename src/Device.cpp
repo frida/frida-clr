@@ -107,6 +107,9 @@ namespace Frida
     array<Process ^> ^ processes = gcnew array<Process ^> (result_length);
     for (gint i = 0; i != result_length; i++)
       processes[i] = gcnew Process (frida_process_list_get (result, i));
+
+    g_object_unref (result);
+
     return processes;
   }
 
