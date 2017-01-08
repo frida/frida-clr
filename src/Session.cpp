@@ -101,17 +101,6 @@ namespace Frida
   }
 
   void
-  Session::DisableJit ()
-  {
-    if (handle == NULL)
-      throw gcnew ObjectDisposedException ("Session");
-
-    GError * error = NULL;
-    frida_session_disable_jit_sync (handle, &error);
-    Marshal::ThrowGErrorIfSet (&error);
-  }
-
-  void
   Session::DisableDebugger ()
   {
     if (handle == NULL)
@@ -119,6 +108,17 @@ namespace Frida
 
     GError * error = NULL;
     frida_session_disable_debugger_sync (handle, &error);
+    Marshal::ThrowGErrorIfSet (&error);
+  }
+
+  void
+  Session::EnableJit ()
+  {
+    if (handle == NULL)
+      throw gcnew ObjectDisposedException ("Session");
+
+    GError * error = NULL;
+    frida_session_enable_jit_sync (handle, &error);
     Marshal::ThrowGErrorIfSet (&error);
   }
 
