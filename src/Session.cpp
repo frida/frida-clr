@@ -17,7 +17,7 @@ namespace Frida
     Runtime::Ref ();
 
     selfHandle = new msclr::gcroot<Session ^> (this);
-    onDetachedHandler = gcnew EventHandler (this, &Session::OnDetached);
+    onDetachedHandler = gcnew SessionDetachedHandler (this, &Session::OnDetached);
     g_signal_connect (handle, "detached", G_CALLBACK (OnSessionDetached), selfHandle);
   }
 
