@@ -8,7 +8,7 @@ using System::Windows::Threading::DispatcherPriority;
 
 namespace Frida
 {
-  static void OnSessionDetached (FridaSession * session, gpointer user_data);
+  static void OnSessionDetached (FridaSession * session, FridaSessionDetachReason reason, gpointer user_data);
 
   Session::Session (FridaSession * handle, Dispatcher ^ dispatcher)
     : handle (handle),
@@ -123,7 +123,7 @@ namespace Frida
   }
 
   void
-  Session::OnDetached (Object ^ sender, EventArgs ^ e)
+  Session::OnDetached (Object ^ sender, SessionDetachedEventArgs ^ e)
   {
     if (dispatcher->CheckAccess ())
       Detached (sender, e);
@@ -132,11 +132,12 @@ namespace Frida
   }
 
   static void
-  OnSessionDetached (FridaSession * session, gpointer user_data)
+  OnSessionDetached (FridaSession * session, FridaSessionDetachReason reason, gpointer user_data)
   {
     (void) session;
 
     msclr::gcroot<Session ^> * wrapper = static_cast<msclr::gcroot<Session ^> *> (user_data);
-    (*wrapper)->OnDetached (*wrapper, EventArgs::Empty);
+    SessionDetachedEventArgs ^ e = gcnew SessionDetachedEventArgs (static_cast<SessionDetachReason> (reason));
+    (*wrapper)->OnDetached (*wrapper, e);
   }
 }

@@ -11,6 +11,9 @@ using System::Windows::Threading::Dispatcher;
 namespace Frida
 {
   ref class Script;
+  enum class SessionDetachReason;
+  ref class SessionDetachedEventArgs;
+  public delegate void SessionDetachedHandler (Object ^ sender, SessionDetachedEventArgs ^ e);
 
   public ref class Session
   {
@@ -22,7 +25,7 @@ namespace Frida
     !Session ();
 
   public:
-    event EventHandler ^ Detached;
+    event SessionDetachedHandler ^ Detached;
 
     property unsigned int Pid { unsigned int get (); }
 
@@ -35,13 +38,35 @@ namespace Frida
     void EnableJit ();
 
   internal:
-    void OnDetached (Object ^ sender, EventArgs ^ e);
+    void OnDetached (Object ^ sender, SessionDetachedEventArgs ^ e);
 
   private:
     FridaSession * handle;
     msclr::gcroot<Session ^> * selfHandle;
 
     Dispatcher ^ dispatcher;
-    EventHandler ^ onDetachedHandler;
+    SessionDetachedHandler ^ onDetachedHandler;
+  };
+
+  public enum class SessionDetachReason
+  {
+    ApplicationRequested = 1,
+    ProcessTerminated,
+    ServerTerminated,
+    DeviceGone
+  };
+
+  public ref class SessionDetachedEventArgs : public EventArgs
+  {
+  public:
+    property SessionDetachReason Reason { SessionDetachReason get () { return reason; } };
+
+    SessionDetachedEventArgs (SessionDetachReason reason)
+    {
+      this->reason = reason;
+    }
+
+  private:
+    SessionDetachReason reason;
   };
 }
