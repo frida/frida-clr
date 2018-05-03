@@ -51,6 +51,7 @@ namespace Frida
   public enum class SessionDetachReason
   {
     ApplicationRequested = 1,
+    ProcessReplaced,
     ProcessTerminated,
     ServerTerminated,
     DeviceGone

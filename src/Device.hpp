@@ -40,7 +40,7 @@ namespace Frida
     property DeviceType Type { DeviceType get (); }
 
     array<Process ^> ^ EnumerateProcesses ();
-    unsigned int Spawn (String ^ path, array<String ^> ^ argv, array<String ^> ^ envp);
+    unsigned int Spawn (String ^ path, array<String ^> ^ argv, array<String ^> ^ envp, String ^ cwd);
     void Resume (unsigned int pid);
     Session ^ Attach (unsigned int pid);
 

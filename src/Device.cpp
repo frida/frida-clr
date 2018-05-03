@@ -114,19 +114,42 @@ namespace Frida
   }
 
   unsigned int
-  Device::Spawn (String ^ path, array<String ^> ^ argv, array<String ^> ^ envp)
+  Device::Spawn (String ^ path, array<String ^> ^ argv, array<String ^> ^ envp, String ^ cwd)
   {
     if (handle == NULL)
       throw gcnew ObjectDisposedException ("Device");
 
     gchar * pathUtf8 = Marshal::ClrStringToUTF8CString (path);
-    gchar ** argvVector = Marshal::ClrStringArrayToUTF8CStringVector (argv);
-    gchar ** envpVector = Marshal::ClrStringArrayToUTF8CStringVector (envp);
+
+    FridaSpawnOptions * options = frida_spawn_options_new ();
+
+    if (argv != nullptr)
+    {
+      gchar ** argvVector = Marshal::ClrStringArrayToUTF8CStringVector (argv);
+      frida_spawn_options_set_argv (options, argvVector, g_strv_length (argvVector));
+      g_strfreev (argvVector);
+    }
+
+    if (envp != nullptr)
+    {
+      gchar ** envpVector = Marshal::ClrStringArrayToUTF8CStringVector (envp);
+      frida_spawn_options_set_envp (options, envpVector, g_strv_length (envpVector));
+      g_strfreev (envpVector);
+    }
+
+    if (cwd != nullptr)
+    {
+      gchar * cwdUtf8 = Marshal::ClrStringToUTF8CString (cwd);
+      frida_spawn_options_set_cwd (options, cwdUtf8);
+      g_free (cwdUtf8);
+    }
+
     GError * error = NULL;
-    guint pid = frida_device_spawn_sync (handle, pathUtf8, argvVector, g_strv_length (argvVector), envpVector, g_strv_length (envpVector), &error);
-    g_strfreev (envpVector);
-    g_strfreev (argvVector);
+    guint pid = frida_device_spawn_sync (handle, pathUtf8, options, &error);
+
+    g_object_unref (options);
     g_free (pathUtf8);
+
     Marshal::ThrowGErrorIfSet (&error);
 
     return pid;
