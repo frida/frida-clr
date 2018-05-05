@@ -114,12 +114,12 @@ namespace Frida
   }
 
   unsigned int
-  Device::Spawn (String ^ path, array<String ^> ^ argv, array<String ^> ^ envp, String ^ cwd)
+  Device::Spawn (String ^ program, array<String ^> ^ argv, array<String ^> ^ envp, array<String ^> ^ env, String ^ cwd)
   {
     if (handle == NULL)
       throw gcnew ObjectDisposedException ("Device");
 
-    gchar * pathUtf8 = Marshal::ClrStringToUTF8CString (path);
+    gchar * programUtf8 = Marshal::ClrStringToUTF8CString (program);
 
     FridaSpawnOptions * options = frida_spawn_options_new ();
 
@@ -137,6 +137,13 @@ namespace Frida
       g_strfreev (envpVector);
     }
 
+    if (env != nullptr)
+    {
+      gchar ** envVector = Marshal::ClrStringArrayToUTF8CStringVector (env);
+      frida_spawn_options_set_env (options, envVector, g_strv_length (envVector));
+      g_strfreev (envVector);
+    }
+
     if (cwd != nullptr)
     {
       gchar * cwdUtf8 = Marshal::ClrStringToUTF8CString (cwd);
@@ -145,10 +152,10 @@ namespace Frida
     }
 
     GError * error = NULL;
-    guint pid = frida_device_spawn_sync (handle, pathUtf8, options, &error);
+    guint pid = frida_device_spawn_sync (handle, programUtf8, options, &error);
 
     g_object_unref (options);
-    g_free (pathUtf8);
+    g_free (programUtf8);
 
     Marshal::ThrowGErrorIfSet (&error);
 
