@@ -84,10 +84,10 @@ namespace Frida
     {
       case FRIDA_DEVICE_TYPE_LOCAL:
         return DeviceType::Local;
-      case FRIDA_DEVICE_TYPE_TETHER:
-        return DeviceType::Tether;
       case FRIDA_DEVICE_TYPE_REMOTE:
         return DeviceType::Remote;
+      case FRIDA_DEVICE_TYPE_USB:
+        return DeviceType::Usb;
       default:
         g_assert_not_reached ();
     }

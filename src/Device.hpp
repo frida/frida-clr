@@ -18,8 +18,8 @@ namespace Frida
   public enum class DeviceType
   {
     Local,
-    Tether,
-    Remote
+    Remote,
+    Usb
   };
 
   public ref class Device
