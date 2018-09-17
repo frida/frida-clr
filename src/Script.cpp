@@ -66,6 +66,17 @@ namespace Frida
   }
 
   void
+  Script::Eternalize ()
+  {
+    if (handle == NULL)
+      throw gcnew ObjectDisposedException ("Script");
+
+    GError * error = NULL;
+    frida_script_eternalize_sync (handle, &error);
+    Marshal::ThrowGErrorIfSet (&error);
+  }
+
+  void
   Script::Post (String ^ message)
   {
     PostWithData (message, nullptr);

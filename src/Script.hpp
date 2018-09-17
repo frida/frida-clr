@@ -27,6 +27,7 @@ namespace Frida
 
     void Load ();
     void Unload ();
+    void Eternalize ();
     void Post (String ^ message);
     void PostWithData (String ^ message, array<unsigned char> ^ data);
 
