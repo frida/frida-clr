@@ -8,7 +8,7 @@ using System::Windows::Threading::DispatcherPriority;
 
 namespace Frida
 {
-  static void OnSessionDetached (FridaSession * session, FridaSessionDetachReason reason, gpointer user_data);
+  static void OnSessionDetached (FridaSession * session, FridaSessionDetachReason reason, FridaCrash * crash, gpointer user_data);
 
   Session::Session (FridaSession * handle, Dispatcher ^ dispatcher)
     : handle (handle),
@@ -132,7 +132,7 @@ namespace Frida
   }
 
   static void
-  OnSessionDetached (FridaSession * session, FridaSessionDetachReason reason, gpointer user_data)
+  OnSessionDetached (FridaSession * session, FridaSessionDetachReason reason, FridaCrash * crash, gpointer user_data)
   {
     (void) session;
 
