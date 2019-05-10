@@ -63,21 +63,33 @@ namespace Frida
   Script ^
   Session::CreateScript (String ^ source)
   {
-    return CreateScript (nullptr, source);
+    return CreateScript (source, nullptr);
   }
 
   Script ^
-  Session::CreateScript (String ^ name, String ^ source)
+  Session::CreateScript (String ^ source, String ^ name)
   {
     if (handle == NULL)
       throw gcnew ObjectDisposedException ("Session");
 
-    GError * error = NULL;
-    gchar * nameUtf8 = (name != nullptr) ? Marshal::ClrStringToUTF8CString (name) : NULL;
     gchar * sourceUtf8 = Marshal::ClrStringToUTF8CString (source);
-    FridaScript * script = frida_session_create_script_sync (handle, nameUtf8, sourceUtf8, &error);
+
+    FridaScriptOptions * options = frida_script_options_new ();
+
+    if (name != nullptr)
+    {
+      gchar * nameUtf8 = Marshal::ClrStringToUTF8CString (name);
+      frida_script_options_set_name (options, nameUtf8);
+      g_free (nameUtf8);
+    }
+
+    GError * error = NULL;
+    FridaScript * script = frida_session_create_script_sync (handle, sourceUtf8, options, &error);
+
+    g_object_unref (options);
+
     g_free (sourceUtf8);
-    g_free (nameUtf8);
+
     Marshal::ThrowGErrorIfSet (&error);
 
     return gcnew Script (script, dispatcher);

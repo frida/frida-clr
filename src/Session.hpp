@@ -31,7 +31,7 @@ namespace Frida
 
     void Detach ();
     Script ^ CreateScript (String ^ source);
-    Script ^ CreateScript (String ^ name, String ^ source);
+    Script ^ CreateScript (String ^ source, String ^ name);
     void EnableDebugger ();
     void EnableDebugger (UInt16 port);
     void DisableDebugger ();
