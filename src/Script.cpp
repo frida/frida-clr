@@ -50,7 +50,7 @@ namespace Frida
       throw gcnew ObjectDisposedException ("Script");
 
     GError * error = NULL;
-    frida_script_load_sync (handle, &error);
+    frida_script_load_sync (handle, nullptr, &error);
     Marshal::ThrowGErrorIfSet (&error);
   }
 
@@ -61,7 +61,7 @@ namespace Frida
       throw gcnew ObjectDisposedException ("Script");
 
     GError * error = NULL;
-    frida_script_unload_sync (handle, &error);
+    frida_script_unload_sync (handle, nullptr, &error);
     Marshal::ThrowGErrorIfSet (&error);
   }
 
@@ -72,7 +72,7 @@ namespace Frida
       throw gcnew ObjectDisposedException ("Script");
 
     GError * error = NULL;
-    frida_script_eternalize_sync (handle, &error);
+    frida_script_eternalize_sync (handle, nullptr, &error);
     Marshal::ThrowGErrorIfSet (&error);
   }
 
@@ -91,7 +91,7 @@ namespace Frida
     GError * error = NULL;
     gchar * messageUtf8 = Marshal::ClrStringToUTF8CString (message);
     GBytes * dataBytes = Marshal::ClrByteArrayToBytes (data);
-    frida_script_post_sync (handle, messageUtf8, dataBytes, &error);
+    frida_script_post_sync (handle, messageUtf8, dataBytes, nullptr, &error);
     g_bytes_unref (dataBytes);
     g_free (messageUtf8);
     Marshal::ThrowGErrorIfSet (&error);

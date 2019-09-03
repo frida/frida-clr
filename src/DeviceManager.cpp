@@ -27,7 +27,7 @@ namespace Frida
     if (handle == NULL)
       return;
 
-    frida_device_manager_close_sync (handle);
+    frida_device_manager_close_sync (handle, nullptr, nullptr);
     g_signal_handlers_disconnect_by_func (handle, OnDeviceManagerChanged, selfHandle);
     delete selfHandle;
     selfHandle = NULL;
@@ -53,7 +53,7 @@ namespace Frida
       throw gcnew ObjectDisposedException ("DeviceManager");
 
     GError * error = NULL;
-    FridaDeviceList * result = frida_device_manager_enumerate_devices_sync (handle, &error);
+    FridaDeviceList * result = frida_device_manager_enumerate_devices_sync (handle, nullptr, &error);
     Marshal::ThrowGErrorIfSet (&error);
 
     gint result_length = frida_device_list_size (result);

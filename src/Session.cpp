@@ -57,7 +57,7 @@ namespace Frida
   {
     if (handle == NULL)
       throw gcnew ObjectDisposedException ("Session");
-    frida_session_detach_sync (handle);
+    frida_session_detach_sync (handle, nullptr, nullptr);
   }
 
   Script ^
@@ -84,7 +84,7 @@ namespace Frida
     }
 
     GError * error = NULL;
-    FridaScript * script = frida_session_create_script_sync (handle, sourceUtf8, options, &error);
+    FridaScript * script = frida_session_create_script_sync (handle, sourceUtf8, options, nullptr, &error);
 
     g_object_unref (options);
 
@@ -108,7 +108,7 @@ namespace Frida
       throw gcnew ObjectDisposedException ("Session");
 
     GError * error = NULL;
-    frida_session_enable_debugger_sync (handle, port, &error);
+    frida_session_enable_debugger_sync (handle, port, nullptr, &error);
     Marshal::ThrowGErrorIfSet (&error);
   }
 
@@ -119,7 +119,7 @@ namespace Frida
       throw gcnew ObjectDisposedException ("Session");
 
     GError * error = NULL;
-    frida_session_disable_debugger_sync (handle, &error);
+    frida_session_disable_debugger_sync (handle, nullptr, &error);
     Marshal::ThrowGErrorIfSet (&error);
   }
 
@@ -130,7 +130,7 @@ namespace Frida
       throw gcnew ObjectDisposedException ("Session");
 
     GError * error = NULL;
-    frida_session_enable_jit_sync (handle, &error);
+    frida_session_enable_jit_sync (handle, nullptr, &error);
     Marshal::ThrowGErrorIfSet (&error);
   }
 

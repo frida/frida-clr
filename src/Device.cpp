@@ -100,7 +100,7 @@ namespace Frida
       throw gcnew ObjectDisposedException ("Device");
 
     GError * error = NULL;
-    FridaProcessList * result = frida_device_enumerate_processes_sync (handle, &error);
+    FridaProcessList * result = frida_device_enumerate_processes_sync (handle, nullptr, &error);
     Marshal::ThrowGErrorIfSet (&error);
 
     gint result_length = frida_process_list_size (result);
@@ -152,7 +152,7 @@ namespace Frida
     }
 
     GError * error = NULL;
-    guint pid = frida_device_spawn_sync (handle, programUtf8, options, &error);
+    guint pid = frida_device_spawn_sync (handle, programUtf8, options, nullptr, &error);
 
     g_object_unref (options);
     g_free (programUtf8);
@@ -169,7 +169,7 @@ namespace Frida
       throw gcnew ObjectDisposedException ("Device");
 
     GError * error = NULL;
-    frida_device_resume_sync (handle, pid, &error);
+    frida_device_resume_sync (handle, pid, nullptr, &error);
     Marshal::ThrowGErrorIfSet (&error);
   }
 
@@ -180,7 +180,7 @@ namespace Frida
       throw gcnew ObjectDisposedException ("Device");
 
     GError * error = NULL;
-    FridaSession * session = frida_device_attach_sync (handle, pid, &error);
+    FridaSession * session = frida_device_attach_sync (handle, pid, nullptr, &error);
     Marshal::ThrowGErrorIfSet (&error);
 
     return gcnew Session (session, dispatcher);
