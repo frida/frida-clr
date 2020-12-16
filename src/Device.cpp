@@ -180,7 +180,7 @@ namespace Frida
       throw gcnew ObjectDisposedException ("Device");
 
     GError * error = NULL;
-    FridaSession * session = frida_device_attach_sync (handle, pid, nullptr, &error);
+    FridaSession * session = frida_device_attach_sync (handle, pid, FRIDA_REALM_NATIVE, nullptr, &error);
     Marshal::ThrowGErrorIfSet (&error);
 
     return gcnew Session (session, dispatcher);
