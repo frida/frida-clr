@@ -124,17 +124,6 @@ namespace Frida
   }
 
   void
-  Session::EnableJit ()
-  {
-    if (handle == NULL)
-      throw gcnew ObjectDisposedException ("Session");
-
-    GError * error = NULL;
-    frida_session_enable_jit_sync (handle, nullptr, &error);
-    Marshal::ThrowGErrorIfSet (&error);
-  }
-
-  void
   Session::OnDetached (Object ^ sender, SessionDetachedEventArgs ^ e)
   {
     if (dispatcher->CheckAccess ())

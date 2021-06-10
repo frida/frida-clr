@@ -35,7 +35,6 @@ namespace Frida
     void EnableDebugger ();
     void EnableDebugger (UInt16 port);
     void DisableDebugger ();
-    void EnableJit ();
 
   internal:
     void OnDetached (Object ^ sender, SessionDetachedEventArgs ^ e);
@@ -53,8 +52,8 @@ namespace Frida
     ApplicationRequested = 1,
     ProcessReplaced,
     ProcessTerminated,
-    ServerTerminated,
-    DeviceGone
+    ConnectionTerminated,
+    DeviceLost
   };
 
   public ref class SessionDetachedEventArgs : public EventArgs

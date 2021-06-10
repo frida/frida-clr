@@ -88,13 +88,11 @@ namespace Frida
     if (handle == NULL)
       throw gcnew ObjectDisposedException ("Script");
 
-    GError * error = NULL;
     gchar * messageUtf8 = Marshal::ClrStringToUTF8CString (message);
     GBytes * dataBytes = Marshal::ClrByteArrayToBytes (data);
-    frida_script_post_sync (handle, messageUtf8, dataBytes, nullptr, &error);
+    frida_script_post (handle, messageUtf8, dataBytes);
     g_bytes_unref (dataBytes);
     g_free (messageUtf8);
-    Marshal::ThrowGErrorIfSet (&error);
   }
 
   void
