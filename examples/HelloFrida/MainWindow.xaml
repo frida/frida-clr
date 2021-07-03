@@ -14,9 +14,9 @@
         </DataTemplate>
         <DataTemplate x:Key="ProcessTemplate">
             <StackPanel Orientation="Horizontal">
-                <Image Source="{Binding LargeIcon}"
-                       Width="{Binding LargeIcon.Width}"
-                       Height="{Binding LargeIcon.Height}"/>
+                <Image Source="{Binding Icons[0]}"
+                       Width="{Binding Icons[0].Width}"
+                       Height="{Binding Icons[0].Height}"/>
                 <TextBlock Text="{Binding Name}"
                            VerticalAlignment="Center"/>
             </StackPanel>

@@ -92,10 +92,10 @@ namespace HelloFrida
 
             try
             {
-                var processes = device.EnumerateProcesses();
+                var processes = device.EnumerateProcesses(Frida.Scope.Full);
                 Array.Sort(processes, delegate(Frida.Process a, Frida.Process b) {
-                    var aHasIcon = a.LargeIcon != null;
-                    var bHasIcon = b.LargeIcon != null;
+                    var aHasIcon = a.Icons.Length != 0;
+                    var bHasIcon = b.Icons.Length != 0;
                     if (aHasIcon == bHasIcon)
                         return a.Name.CompareTo(b.Name);
                     else
@@ -139,7 +139,7 @@ namespace HelloFrida
             var device = deviceList.SelectedItem as Frida.Device;
             try
             {
-                device.Spawn("C:\\Windows\\notepad.exe", new string[] { "C:\\Windows\\notepad.exe", "C:\\document.txt" }, new string[] { });
+                device.Spawn("C:\\Windows\\notepad.exe", new string[] { "C:\\Windows\\notepad.exe", "C:\\document.txt" }, null, null, null);
             }
             catch (Exception ex)
             {
@@ -174,7 +174,7 @@ namespace HelloFrida
                 debugConsole.Items.Add("Attach failed: " + ex.Message);
                 return;
             }
-            session.Detached += new EventHandler(session_Detached);
+            session.Detached += new Frida.SessionDetachedHandler(session_Detached);
             debugConsole.Items.Add("Attached to " + session.Pid);
             RefreshAllowedActions();
         }
@@ -187,11 +187,11 @@ namespace HelloFrida
             RefreshAllowedActions();
         }
 
-        private void session_Detached(object sender, EventArgs e)
+        private void session_Detached(object sender, Frida.SessionDetachedEventArgs e)
         {
             if (sender == session)
             {
-                debugConsole.Items.Add("Detached from Session with Pid: " + session.Pid);
+                debugConsole.Items.Add($"Detached from Session with PID {session.Pid} ({e.Reason})");
                 session = null;
                 script = null;
                 RefreshAllowedActions();
