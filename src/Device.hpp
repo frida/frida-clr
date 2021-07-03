@@ -22,6 +22,13 @@ namespace Frida
     Usb
   };
 
+  public enum class Scope
+  {
+    Minimal,
+    Metadata,
+    Full
+  };
+
   public ref class Device
   {
   internal:
@@ -40,6 +47,8 @@ namespace Frida
     property DeviceType Type { DeviceType get (); }
 
     array<Process ^> ^ EnumerateProcesses ();
+    array<Process ^> ^ EnumerateProcesses (Scope scope);
+    array<Process ^> ^ EnumerateProcesses (array<unsigned int> ^ pids, Scope scope);
     unsigned int Spawn (String ^ program, array<String ^> ^ argv, array<String ^> ^ envp, array<String ^> ^ env, String ^ cwd);
     void Resume (unsigned int pid);
     Session ^ Attach (unsigned int pid);

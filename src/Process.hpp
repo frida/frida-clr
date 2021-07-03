@@ -6,6 +6,7 @@
 #include <frida-core.h>
 
 using namespace System;
+using namespace System::Collections::Generic;
 using namespace System::Windows::Media;
 
 namespace Frida
@@ -22,15 +23,15 @@ namespace Frida
   public:
     property unsigned int Pid { unsigned int get (); }
     property String ^ Name { String ^ get (); }
-    property ImageSource ^ SmallIcon { ImageSource ^ get (); }
-    property ImageSource ^ LargeIcon { ImageSource ^ get (); }
+    property IDictionary<String ^, Object ^> ^ Parameters { IDictionary<String ^, Object ^> ^ get (); }
+    property array<ImageSource ^> ^ Icons { array<ImageSource ^> ^ get (); }
 
     virtual String ^ ToString () override;
 
   private:
     FridaProcess * handle;
 
-    ImageSource ^ smallIcon;
-    ImageSource ^ largeIcon;
+    IDictionary<String ^, Object ^> ^ parameters;
+    array<ImageSource ^> ^ icons;
   };
 }

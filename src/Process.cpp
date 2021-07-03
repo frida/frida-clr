@@ -7,8 +7,8 @@ namespace Frida
 {
   Process::Process (FridaProcess * handle)
     : handle (handle),
-      smallIcon (nullptr),
-      largeIcon (nullptr)
+      parameters (nullptr),
+      icons (nullptr)
   {
     Runtime::Ref ();
   }
@@ -18,16 +18,11 @@ namespace Frida
     if (handle == NULL)
       return;
 
-    if (largeIcon != nullptr)
-    {
-      delete largeIcon;
-      largeIcon = nullptr;
-    }
-    if (smallIcon != nullptr)
-    {
-      delete smallIcon;
-      smallIcon = nullptr;
-    }
+    delete icons;
+    icons = nullptr;
+
+    delete parameters;
+    parameters = nullptr;
 
     this->!Process ();
   }
@@ -59,24 +54,30 @@ namespace Frida
     return Marshal::UTF8CStringToClrString (frida_process_get_name (handle));
   }
 
-  ImageSource ^
-  Process::SmallIcon::get ()
+  IDictionary<String ^, Object ^> ^
+  Process::Parameters::get ()
   {
     if (handle == NULL)
       throw gcnew ObjectDisposedException ("Process");
-    if (smallIcon == nullptr)
-      smallIcon = Marshal::FridaIconToImageSource (frida_process_get_small_icon (handle));
-    return smallIcon;
+    if (parameters == nullptr)
+      parameters = Marshal::ParametersDictToClrDictionary (frida_process_get_parameters (handle));
+    return parameters;
   }
 
-  ImageSource ^
-  Process::LargeIcon::get ()
+  array<ImageSource ^> ^
+  Process::Icons::get ()
   {
     if (handle == NULL)
       throw gcnew ObjectDisposedException ("Process");
-    if (largeIcon == nullptr)
-      largeIcon = Marshal::FridaIconToImageSource (frida_process_get_large_icon (handle));
-    return largeIcon;
+    if (icons == nullptr)
+    {
+      Object ^ val;
+      if (Parameters->TryGetValue ("icons", val))
+        icons = Marshal::IconArrayToClrImageSourceArray (val);
+      else
+        icons = gcnew array<ImageSource ^> (0);
+    }
+    return icons;
   }
 
   String ^

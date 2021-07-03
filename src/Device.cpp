@@ -70,7 +70,7 @@ namespace Frida
     if (handle == NULL)
       throw gcnew ObjectDisposedException ("Device");
     if (icon == nullptr)
-      icon = Marshal::FridaIconToImageSource (frida_device_get_icon (handle));
+      icon = Marshal::IconToClrImageSource (Marshal::VariantToClrObject (frida_device_get_icon (handle)));
     return icon;
   }
 
@@ -96,11 +96,36 @@ namespace Frida
   array<Process ^> ^
   Device::EnumerateProcesses ()
   {
+    return EnumerateProcesses (Scope::Minimal);
+  }
+
+  array<Process ^> ^
+  Device::EnumerateProcesses (Scope scope)
+  {
+    return EnumerateProcesses (nullptr, scope);
+  }
+
+  array<Process ^> ^
+  Device::EnumerateProcesses (array<unsigned int> ^ pids, Scope scope)
+  {
     if (handle == NULL)
       throw gcnew ObjectDisposedException ("Device");
 
+    FridaProcessQueryOptions * options = frida_process_query_options_new ();
+
+    if (pids != nullptr)
+    {
+      for each (unsigned int pid in pids)
+        frida_process_query_options_select_pid (options, pid);
+    }
+
+    frida_process_query_options_set_scope (options, static_cast<FridaScope> (scope));
+
     GError * error = NULL;
-    FridaProcessList * result = frida_device_enumerate_processes_sync (handle, nullptr, &error);
+    FridaProcessList * result = frida_device_enumerate_processes_sync (handle, options, nullptr, &error);
+
+    g_object_unref (options);
+
     Marshal::ThrowGErrorIfSet (&error);
 
     gint result_length = frida_process_list_size (result);
