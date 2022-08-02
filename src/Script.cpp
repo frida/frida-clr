@@ -96,6 +96,34 @@ namespace Frida
   }
 
   void
+  Script::EnableDebugger ()
+  {
+    return EnableDebugger (0);
+  }
+
+  void
+  Script::EnableDebugger (UInt16 port)
+  {
+    if (handle == NULL)
+      throw gcnew ObjectDisposedException ("Script");
+
+    GError * error = NULL;
+    frida_script_enable_debugger_sync (handle, port, nullptr, &error);
+    Marshal::ThrowGErrorIfSet (&error);
+  }
+
+  void
+  Script::DisableDebugger ()
+  {
+    if (handle == NULL)
+      throw gcnew ObjectDisposedException ("Script");
+
+    GError * error = NULL;
+    frida_script_disable_debugger_sync (handle, nullptr, &error);
+    Marshal::ThrowGErrorIfSet (&error);
+  }
+
+  void
   Script::OnMessage (Object ^ sender, ScriptMessageEventArgs ^ e)
   {
     if (dispatcher->CheckAccess ())

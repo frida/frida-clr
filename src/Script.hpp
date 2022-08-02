@@ -30,6 +30,9 @@ namespace Frida
     void Eternalize ();
     void Post (String ^ message);
     void PostWithData (String ^ message, array<unsigned char> ^ data);
+    void EnableDebugger ();
+    void EnableDebugger (UInt16 port);
+    void DisableDebugger ();
 
   internal:
     void OnMessage (Object ^ sender, ScriptMessageEventArgs ^ e);
