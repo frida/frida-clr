@@ -1,7 +1,11 @@
-*.user
+.idea/
 /build/
 /deps/
-/examples/HelloFrida/.vs/
-/examples/HelloFrida/bin/
-/examples/HelloFrida/obj/
 /subprojects/*
+!/subprojects/
+!/subprojects/frida-core.wrap
+obj
+bin
+*.user
+src/Frida.NET.Bindings/Internal
+src/Frida.NET.Bindings/Public

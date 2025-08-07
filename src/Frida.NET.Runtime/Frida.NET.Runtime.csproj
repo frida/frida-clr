@@ -1,0 +1,86 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <Authors>Frida Developers</Authors>
+    <PackageProjectUrl>https://github.com/frida/frida-net</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/frida/frida-net</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="meson.build" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(Platform)' == 'linux-x86'">
+    <PackageId>Frida.NET.Runtime.linux-x86</PackageId>
+    <RuntimeIdentifier>linux-x86</RuntimeIdentifier>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(Platform)' == 'linux-x86'">
+    <None Include="Frida.so" Pack="true" PackagePath="runtimes/linux-x86/native" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(Platform)' == 'linux-x86_64'">
+    <PackageId>Frida.NET.Runtime.linux-x64</PackageId>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(Platform)' == 'linux-x86_64'">
+    <None Include="Frida.so" Pack="true" PackagePath="runtimes/linux-x64/native" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(Platform)' == 'linux-arm64'">
+    <PackageId>Frida.NET.Runtime.linux-arm64</PackageId>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(Platform)' == 'linux-arm64'">
+    <None Include="Frida.so" Pack="true" PackagePath="runtimes/linux-arm64/native" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(Platform)' == 'linux-armhf'">
+    <PackageId>Frida.NET.Runtime.linux-arm32</PackageId>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(Platform)' == 'linux-armhf'">
+    <None Include="Frida.so" Pack="true" PackagePath="runtimes/linux-arm32/native" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(Platform)' == 'linux-mips64'">
+    <PackageId>Frida.NET.Runtime.linux-mips64</PackageId>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(Platform)' == 'linux-mips64'">
+    <None Include="Frida.so" Pack="true" PackagePath="runtimes/linux-mips64/native" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(Platform)' == 'win-x86_64'">
+    <PackageId>Frida.NET.Runtime.win-x64</PackageId>
+  </PropertyGroup>    
+  <ItemGroup Condition="'$(Platform)' == 'win-x86_64'">
+    <None Include="Frida.dll" Pack="true" PackagePath="runtimes/win-x64/native" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(Platform)' == 'win-x86'">
+    <PackageId>Frida.NET.Runtime.win-x86</PackageId>
+  </PropertyGroup>    
+  <ItemGroup Condition="'$(Platform)' == 'win-x86'">
+    <None Include="Frida.dll" Pack="true" PackagePath="runtimes/win-x86/native" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(Platform)' == 'macos-x86_64'">
+    <PackageId>Frida.NET.Runtime.osx-x64</PackageId>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(Platform)' == 'macos-x86_64'">
+    <None Include="Frida.dylib" Pack="true" PackagePath="runtimes/osx-x64/native" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(Platform)' == 'macos-arm64'">
+    <PackageId>Frida.NET.Runtime.osx-arm64</PackageId>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(Platform)' == 'macos-arm64'">
+    <None  Include="Frida.dylib" Pack="true" PackagePath="runtimes/osx-arm64/native" />
+  </ItemGroup>
+
+</Project>

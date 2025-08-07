@@ -1,3 +1,6 @@
 [submodule "releng"]
 	path = releng
 	url = https://github.com/frida/releng.git
+[submodule "gir.core"]
+	path = gir.core
+	url = https://github.com/gircore/gir.core.git
