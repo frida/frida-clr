@@ -50,7 +50,7 @@ elif host_os == 'darwin'
 endif
 
 build_library_runtime = custom_target(
-  'build-library-runtime',
+  'build-runtime',
   input: [
     fs.copyfile('Frida.NET.Runtime.csproj', 'Frida.NET.Runtime.csproj')
   ],

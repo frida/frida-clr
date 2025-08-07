@@ -9,8 +9,8 @@ girinit = custom_target('initialize-gir-core',
   command: [
     find_program('python3'),
     files('initialize-gir-core.py'),
-    '--gir-scripts', meson.source_root() / 'gir.core' / 'scripts',
-    '--gir-src', meson.source_root() / 'gir.core' / 'src',
+    '--gir-scripts', meson.project_source_root() / 'gir.core' / 'scripts',
+    '--gir-src', meson.project_source_root() / 'gir.core' / 'src',
     '--dummy-output-file', '@OUTPUT@',
   ]
 )
@@ -24,6 +24,6 @@ girtool = custom_target('build-gir-tool',
     '-o', meson.current_build_dir(),
     '-c', 'Release',
     '-p:PublishSingleFile=true',
-    meson.source_root() / 'gir.core' / 'src' / 'Generation' / 'GirTool' / 'GirTool.csproj'
+    meson.project_source_root() / 'gir.core' / 'src' / 'Generation' / 'GirTool' / 'GirTool.csproj'
   ]
 )
