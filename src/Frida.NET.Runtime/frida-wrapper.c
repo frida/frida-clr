@@ -10,9 +10,15 @@ BOOL WINAPI DllMain(
     DWORD fdwReason,
     LPVOID lpvReserved)
 {
-    if (fdwReason == DLL_PROCESS_ATTACH)
+    switch (fdwReason)
     {
-        frida_init();
+        case DLL_PROCESS_ATTACH:
+            frida_init();
+            break;
+
+        case DLL_PROCESS_DETACH:
+            frida_deinit();
+            break;
     }
 
     return TRUE;
@@ -24,6 +30,12 @@ __attribute__((constructor))
 static void frida_init_wrapper(void)
 {
     frida_init();
+}
+
+__attribute__((destructor))
+static void frida_deinit_wrapper(void)
+{
+    frida_deinit();
 }
 
 #endif
