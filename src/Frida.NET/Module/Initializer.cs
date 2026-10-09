@@ -13,6 +13,7 @@ internal static class Initializer
         Importer.RegisterAsDllImportResolver(typeof(GObject.Module).Assembly);
         Importer.RegisterAsDllImportResolver(typeof(Gio.Module).Assembly);
         Importer.RegisterAsDllImportResolver(typeof(Frida.Internal.ImportResolver).Assembly);
+        Importer.RegisterAsDllImportResolver(typeof(Initializer).Assembly);
         
         InitializeModule("GLib.Internal.TypeRegistration", typeof(GLib.Module).Assembly);
         InitializeModule("GObject.Internal.TypeRegistration", typeof(GObject.Module).Assembly);

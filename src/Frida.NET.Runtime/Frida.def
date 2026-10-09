@@ -4464,3 +4464,4 @@ g_weak_ref_get
 g_weak_ref_init
 g_weak_ref_set
 frida_init
+frida_get_main_context
