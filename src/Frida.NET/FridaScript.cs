@@ -22,24 +22,39 @@ public class FridaScript : IDisposable
             _ => _script.OnDestroyed -= HandleDestroyed);
     }
 
-    public void Load()
+    public Task Load()
     {
-        _script.LoadSync(null);
-    }
-    
-    public void Unload()
-    {
-        _script.UnloadSync(null);
+        return FridaRuntime.Invoke(
+            ready => Internal.Script.Load(_script.Handle.DangerousGetHandle(), IntPtr.Zero, ready, IntPtr.Zero),
+            _script.LoadFinish);
     }
 
-    public void EnableDebugger(ushort port)
+    public Task Unload()
     {
-        _script.EnableDebuggerSync(port, null);
+        return FridaRuntime.Invoke(
+            ready => Internal.Script.Unload(_script.Handle.DangerousGetHandle(), IntPtr.Zero, ready, IntPtr.Zero),
+            _script.UnloadFinish);
     }
-    
-    public void DisableDebugger()
+
+    public Task EnableDebugger(ushort port)
     {
-        _script.DisableDebuggerSync(null);
+        return FridaRuntime.Invoke(
+            ready => Internal.Script.EnableDebugger(_script.Handle.DangerousGetHandle(), port, IntPtr.Zero, ready, IntPtr.Zero),
+            _script.EnableDebuggerFinish);
+    }
+
+    public Task DisableDebugger()
+    {
+        return FridaRuntime.Invoke(
+            ready => Internal.Script.DisableDebugger(_script.Handle.DangerousGetHandle(), IntPtr.Zero, ready, IntPtr.Zero),
+            _script.DisableDebuggerFinish);
+    }
+
+    public Task Eternalize()
+    {
+        return FridaRuntime.Invoke(
+            ready => Internal.Script.Eternalize(_script.Handle.DangerousGetHandle(), IntPtr.Zero, ready, IntPtr.Zero),
+            _script.EternalizeFinish);
     }
 
     public void Post(string json, byte[]? bytes = null)
@@ -47,19 +62,13 @@ public class FridaScript : IDisposable
         _script.Post(json, bytes != null ? Bytes.New(bytes) : null);
     }
 
-    public void Eternalize()
-    {
-        _script.EternalizeSync(null);
-    }
-
     public bool IsDestroyed()
     {
         return _script.IsDestroyed();
     }
-    
+
     private void HandleMessage(Script script, Script.MessageSignalArgs eventArgs)
     {
-        // TODO: Consume eventArgs.Bytes
         _onMessage.InvokeHandlers(this, new ScriptMessageEventArgs(eventArgs.Json));
     }
 

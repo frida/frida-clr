@@ -10,7 +10,9 @@ public class FridaDeviceManager : IDisposable
     private readonly LazyEvent<DeviceAddedEventArgs> _onDeviceAdded;
     private readonly LazyEvent<DeviceRemovedEventArgs> _onDeviceRemoved;
     private bool _disposed;
-    
+
+    internal DeviceManager Manager => _deviceManager;
+
     public FridaDeviceManager()
     {
         _deviceManager = DeviceManager.New();
@@ -28,38 +30,45 @@ public class FridaDeviceManager : IDisposable
             _ => _deviceManager.OnChanged -= HandleChanged);
     }
 
-    public FridaDevice? FindDevice(DevicePredicate predicate, TimeSpan timeout)
+    public async Task<FridaDevice?> FindDevice(DevicePredicate predicate, TimeSpan timeout)
     {
-        var device = _deviceManager.FindDeviceSync(x => predicate(new FridaDevice(x)), (int)timeout.TotalMilliseconds, null);
-        if (device == null) return null;
-        
-        return new FridaDevice(device);
-    }
-    
-    public FridaDevice? FindDeviceById(string id, TimeSpan timeout)
-    {
-        var device = _deviceManager.FindDeviceByIdSync(id, (int)timeout.TotalMilliseconds, null);
-        if (device == null) return null;
-        
-        return new FridaDevice(device);
+        var predicateHandler = new Internal.DeviceManager.PredicateCallHandler(x => predicate(new FridaDevice(x)));
+        var device = await FridaRuntime.Invoke(
+            ready => Internal.DeviceManager.FindDevice(_deviceManager.Handle.DangerousGetHandle(), predicateHandler.NativeCallback, IntPtr.Zero, (int)timeout.TotalMilliseconds, IntPtr.Zero, ready, IntPtr.Zero),
+            _deviceManager.FindDeviceFinish).ConfigureAwait(false);
+        return device != null ? new FridaDevice(device) : null;
     }
 
-    public FridaDevice? FindDeviceByType(DeviceType deviceType, TimeSpan timeout)
+    public async Task<FridaDevice?> FindDeviceById(string id, TimeSpan timeout)
     {
-        var device = _deviceManager.FindDeviceByTypeSync(deviceType, (int)timeout.TotalMilliseconds, null);
-        if (device == null) return null;
-        
-        return new FridaDevice(device);
+        var device = await FridaRuntime.Invoke(
+            ready =>
+            {
+                using var idNative = GLib.Internal.NonNullableUtf8StringOwnedHandle.Create(id);
+                Internal.DeviceManager.FindDeviceById(_deviceManager.Handle.DangerousGetHandle(), idNative, (int)timeout.TotalMilliseconds, IntPtr.Zero, ready, IntPtr.Zero);
+            },
+            _deviceManager.FindDeviceByIdFinish).ConfigureAwait(false);
+        return device != null ? new FridaDevice(device) : null;
     }
-    
-    public IEnumerable<FridaDevice> EnumerateDevices()
-    {
-        using var deviceList = _deviceManager.EnumerateDevicesSync(null);
 
+    public async Task<FridaDevice?> FindDeviceByType(DeviceType deviceType, TimeSpan timeout)
+    {
+        var device = await FridaRuntime.Invoke(
+            ready => Internal.DeviceManager.FindDeviceByType(_deviceManager.Handle.DangerousGetHandle(), deviceType, (int)timeout.TotalMilliseconds, IntPtr.Zero, ready, IntPtr.Zero),
+            _deviceManager.FindDeviceByTypeFinish).ConfigureAwait(false);
+        return device != null ? new FridaDevice(device) : null;
+    }
+
+    public async Task<IReadOnlyList<FridaDevice>> EnumerateDevices()
+    {
+        using var deviceList = await FridaRuntime.Invoke(
+            ready => Internal.DeviceManager.EnumerateDevices(_deviceManager.Handle.DangerousGetHandle(), IntPtr.Zero, ready, IntPtr.Zero),
+            _deviceManager.EnumerateDevicesFinish).ConfigureAwait(false);
+
+        var devices = new List<FridaDevice>();
         for (var i = 0; i < deviceList.Size(); i++)
-        {
-            yield return new FridaDevice(deviceList.Get(i));
-        }
+            devices.Add(new FridaDevice(deviceList.Get(i)));
+        return devices;
     }
 
     private void HandleAdded(DeviceManager sender, DeviceManager.AddedSignalArgs args)

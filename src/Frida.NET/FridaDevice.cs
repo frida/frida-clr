@@ -1,4 +1,4 @@
-﻿using Frida.Events;
+using Frida.Events;
 using Frida.Helpers;
 
 namespace Frida;
@@ -16,131 +16,129 @@ public class FridaDevice : IDisposable
             _ => _device.OnLost += HandleLost,
             _ => _device.OnLost -= HandleLost);
     }
-    
+
     public string? Id => _device.Id;
     public string? Name => _device.Name;
     public DeviceType Type => _device.Dtype;
 
-    public void EnableSpawnGating()
+    public Task EnableSpawnGating()
     {
-        _device.EnableSpawnGatingSync(null, null);
+        return FridaRuntime.Invoke(
+            ready => Internal.Device.EnableSpawnGating(_device.Handle.DangerousGetHandle(), IntPtr.Zero, IntPtr.Zero, ready, IntPtr.Zero),
+            _device.EnableSpawnGatingFinish);
     }
 
-    public void DisableSpawnGating()
+    public Task DisableSpawnGating()
     {
-        _device.DisableSpawnGatingSync(null);
+        return FridaRuntime.Invoke(
+            ready => Internal.Device.DisableSpawnGating(_device.Handle.DangerousGetHandle(), IntPtr.Zero, ready, IntPtr.Zero),
+            _device.DisableSpawnGatingFinish);
     }
 
-    public IEnumerable<FridaApplication> EnumerateApplications(Scope scope = Scope.Minimal)
+    public async Task<IReadOnlyList<FridaApplication>> EnumerateApplications(Scope scope = Scope.Minimal)
     {
-        var applicationQueryOptions = ApplicationQueryOptions.New();
-        
-        applicationQueryOptions.Scope = scope;
-        
-        var applicationList = _device.EnumerateApplicationsSync(applicationQueryOptions, null);
-        
-        for (var i = 0; i < applicationList.Size(); i++)
-        {
-            yield return new FridaApplication(applicationList.Get(i));
-        }
-    }
-    
-    public IEnumerable<FridaProcess> EnumerateProcesses(Scope scope = Scope.Minimal)
-    {
-        var processQueryOptions = ProcessQueryOptions.New();
-        
-        processQueryOptions.Scope = scope;
-        
-        var processList = _device.EnumerateProcessesSync(processQueryOptions, null);
+        var options = ApplicationQueryOptions.New();
+        options.Scope = scope;
 
-        for (var i = 0; i < processList.Size(); i++)
-        {
-            yield return new FridaProcess(processList.Get(i));
-        }
+        using var list = await FridaRuntime.Invoke(
+            ready => Internal.Device.EnumerateApplications(_device.Handle.DangerousGetHandle(), options.Handle.DangerousGetHandle(), IntPtr.Zero, ready, IntPtr.Zero),
+            _device.EnumerateApplicationsFinish).ConfigureAwait(false);
+
+        var applications = new List<FridaApplication>();
+        for (var i = 0; i < list.Size(); i++)
+            applications.Add(new FridaApplication(list.Get(i)));
+        return applications;
     }
 
-    public uint Spawn(string program, Data.SpawnOptions? spawnOptions = null)
+    public async Task<IReadOnlyList<FridaProcess>> EnumerateProcesses(Scope scope = Scope.Minimal)
     {
-        var internalSpawnOptions = SpawnOptions.New();
+        var options = ProcessQueryOptions.New();
+        options.Scope = scope;
 
-        if (spawnOptions != null)
-        {
-            if (spawnOptions.Argv != null && 
-                spawnOptions.Argv.Length > 0)
-            {
-                internalSpawnOptions.Argv = spawnOptions.Argv;
-            }
-            
-            if (spawnOptions.Envp != null && 
-                spawnOptions.Envp.Length > 0)
-            {
-                internalSpawnOptions.Envp = spawnOptions.Envp;
-            }
-            
-            if (spawnOptions.Env != null && 
-                spawnOptions.Env.Length > 0)
-            {
-                internalSpawnOptions.Env = spawnOptions.Env;
-            }
-            
-            if (spawnOptions.Cwd != null)
-            {
-                internalSpawnOptions.Cwd = spawnOptions.Cwd;
-            }
-            
-            if (spawnOptions.Stdio != null)
-            {
-                internalSpawnOptions.Stdio = spawnOptions.Stdio.Value;
-            }
-        }
-        
-        return _device.SpawnSync(program, internalSpawnOptions, null);
+        using var list = await FridaRuntime.Invoke(
+            ready => Internal.Device.EnumerateProcesses(_device.Handle.DangerousGetHandle(), options.Handle.DangerousGetHandle(), IntPtr.Zero, ready, IntPtr.Zero),
+            _device.EnumerateProcessesFinish).ConfigureAwait(false);
+
+        var processes = new List<FridaProcess>();
+        for (var i = 0; i < list.Size(); i++)
+            processes.Add(new FridaProcess(list.Get(i)));
+        return processes;
     }
 
-    public void Resume(uint pid)
+    public Task<uint> Spawn(string program, Data.SpawnOptions? spawnOptions = null)
     {
-        _device.ResumeSync(pid, null);
+        var options = BuildSpawnOptions(spawnOptions);
+        return FridaRuntime.Invoke(
+            ready =>
+            {
+                using var programNative = GLib.Internal.NonNullableUtf8StringOwnedHandle.Create(program);
+                Internal.Device.Spawn(_device.Handle.DangerousGetHandle(), programNative, options.Handle.DangerousGetHandle(), IntPtr.Zero, ready, IntPtr.Zero);
+            },
+            _device.SpawnFinish);
     }
 
-    public FridaSession Attach(uint pid, Data.SessionOptions? sessionOptions = null)
+    public Task Resume(uint pid)
     {
-        var internalSessionOptions = SessionOptions.New();
+        return FridaRuntime.Invoke(
+            ready => Internal.Device.Resume(_device.Handle.DangerousGetHandle(), pid, IntPtr.Zero, ready, IntPtr.Zero),
+            _device.ResumeFinish);
+    }
 
-        if (sessionOptions != null)
-        {
-            if (sessionOptions.Realm != null)
-            {
-                internalSessionOptions.Realm = sessionOptions.Realm.Value;
-            }
-            
-            if (sessionOptions.PersistTimeout.HasValue)
-            {
-                internalSessionOptions.PersistTimeout = sessionOptions.PersistTimeout.Value;
-            }
-            
-            if (sessionOptions.EmulatedAgentPath != null)
-            {
-                internalSessionOptions.EmulatedAgentPath = sessionOptions.EmulatedAgentPath;
-            }
-        }
-        
-        var session = _device.AttachSync(pid, internalSessionOptions, null);
-        
+    public async Task<FridaSession> Attach(uint pid, Data.SessionOptions? sessionOptions = null)
+    {
+        var options = BuildSessionOptions(sessionOptions);
+        var session = await FridaRuntime.Invoke(
+            ready => Internal.Device.Attach(_device.Handle.DangerousGetHandle(), pid, options.Handle.DangerousGetHandle(), IntPtr.Zero, ready, IntPtr.Zero),
+            _device.AttachFinish).ConfigureAwait(false);
         return new FridaSession(session);
     }
-    
+
+    private static SpawnOptions BuildSpawnOptions(Data.SpawnOptions? spawnOptions)
+    {
+        var options = SpawnOptions.New();
+        if (spawnOptions == null)
+            return options;
+
+        if (spawnOptions.Argv is { Length: > 0 })
+            options.Argv = spawnOptions.Argv;
+        if (spawnOptions.Envp is { Length: > 0 })
+            options.Envp = spawnOptions.Envp;
+        if (spawnOptions.Env is { Length: > 0 })
+            options.Env = spawnOptions.Env;
+        if (spawnOptions.Cwd != null)
+            options.Cwd = spawnOptions.Cwd;
+        if (spawnOptions.Stdio != null)
+            options.Stdio = spawnOptions.Stdio.Value;
+        return options;
+    }
+
+    private static SessionOptions BuildSessionOptions(Data.SessionOptions? sessionOptions)
+    {
+        var options = SessionOptions.New();
+        if (sessionOptions == null)
+            return options;
+
+        if (sessionOptions.Realm != null)
+            options.Realm = sessionOptions.Realm.Value;
+        if (sessionOptions.PersistTimeout.HasValue)
+            options.PersistTimeout = sessionOptions.PersistTimeout.Value;
+        if (sessionOptions.EmulatedAgentPath != null)
+            options.EmulatedAgentPath = sessionOptions.EmulatedAgentPath;
+        return options;
+    }
+
     private void HandleLost(Device sender, EventArgs eventArgs)
     {
         _onLost.InvokeHandlers(this, new DeviceLostEventArgs());
     }
-    
+
     public void Dispose()
     {
-        if (_disposed) 
+        if (_disposed)
         {
-            return;   
+            return;
         }
-        
+
         _disposed = true;
         _onLost.Dispose();
         _device.Dispose();
