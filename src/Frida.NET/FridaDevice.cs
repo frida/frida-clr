@@ -23,7 +23,7 @@ public class FridaDevice : IDisposable
 
     public void EnableSpawnGating()
     {
-        _device.EnableSpawnGatingSync(null);
+        _device.EnableSpawnGatingSync(null, null);
     }
 
     public void DisableSpawnGating()
