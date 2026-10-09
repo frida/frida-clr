@@ -18,11 +18,17 @@ def main(bindings_in: PathLike,
         with open(binding_file, 'r', encoding='utf-8') as f:
             with open(path_out, 'w', encoding='utf-8') as f_out:
                 content = f.read()
-                content = content.replace('public class', 'internal class')
-                content = content.replace('public partial class', 'internal partial class')
-                content = content.replace('public partial struct', 'internal partial struct')
-                content = content.replace('public partial interface', 'internal partial interface')
                 content = content.replace('public sealed partial class', 'internal sealed partial class')
+                content = content.replace('public abstract partial class', 'internal abstract partial class')
+                content = content.replace('public abstract class', 'internal abstract class')
+                content = content.replace('public sealed class', 'internal sealed class')
+                content = content.replace('public static class', 'internal static class')
+                content = content.replace('public partial class', 'internal partial class')
+                content = content.replace('public class', 'internal class')
+                content = content.replace('public partial struct', 'internal partial struct')
+                content = content.replace('public struct', 'internal struct')
+                content = content.replace('public partial interface', 'internal partial interface')
+                content = content.replace('public interface', 'internal interface')
                 content = content.replace('public delegate', 'internal delegate')
                 f_out.write(content)
 
