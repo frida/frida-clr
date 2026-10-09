@@ -9,6 +9,8 @@ internal static class Initializer
     [ModuleInitializer]
     public static void Initialize()
     {
+        DisableGoAsyncPreemption();
+
         Importer.RegisterAsDllImportResolver(typeof(GLib.Module).Assembly);
         Importer.RegisterAsDllImportResolver(typeof(GObject.Module).Assembly);
         Importer.RegisterAsDllImportResolver(typeof(Gio.Module).Assembly);
@@ -20,6 +22,13 @@ internal static class Initializer
         InitializeModule("Gio.Internal.TypeRegistration", typeof(Gio.Module).Assembly);
         
         Frida.Internal.TypeRegistration.RegisterTypes();
+    }
+
+    private static void DisableGoAsyncPreemption()
+    {
+        var godebug = Environment.GetEnvironmentVariable("GODEBUG");
+        var setting = "asyncpreemptoff=1";
+        Environment.SetEnvironmentVariable("GODEBUG", string.IsNullOrEmpty(godebug) ? setting : $"{godebug},{setting}");
     }
 
     private static void InitializeModule(string typeRegistrationName, Assembly assembly)
