@@ -7,6 +7,7 @@ public class FridaDevice : IDisposable
 {
     private readonly Device _device;
     private readonly LazyEvent<DeviceLostEventArgs> _onLost;
+    private readonly LazyEvent<SpawnAddedEventArgs> _onSpawnAdded;
     private bool _disposed;
 
     internal FridaDevice(Device device)
@@ -15,6 +16,9 @@ public class FridaDevice : IDisposable
         _onLost = new LazyEvent<DeviceLostEventArgs>(
             _ => _device.OnLost += HandleLost,
             _ => _device.OnLost -= HandleLost);
+        _onSpawnAdded = new LazyEvent<SpawnAddedEventArgs>(
+            _ => _device.OnSpawnAdded += HandleSpawnAdded,
+            _ => _device.OnSpawnAdded -= HandleSpawnAdded);
     }
 
     public string? Id => _device.Id;
@@ -132,6 +136,12 @@ public class FridaDevice : IDisposable
         _onLost.InvokeHandlers(this, new DeviceLostEventArgs());
     }
 
+    private void HandleSpawnAdded(Device sender, Device.SpawnAddedSignalArgs eventArgs)
+    {
+        var spawn = eventArgs.Spawn;
+        _onSpawnAdded.InvokeHandlers(this, new SpawnAddedEventArgs(spawn.GetPid(), spawn.GetIdentifier()));
+    }
+
     public void Dispose()
     {
         if (_disposed)
@@ -141,6 +151,7 @@ public class FridaDevice : IDisposable
 
         _disposed = true;
         _onLost.Dispose();
+        _onSpawnAdded.Dispose();
         _device.Dispose();
     }
 
@@ -148,5 +159,11 @@ public class FridaDevice : IDisposable
     {
         add => _onLost.Add(value);
         remove => _onLost.Remove(value);
+    }
+
+    public event EventHandler<SpawnAddedEventArgs> OnSpawnAdded
+    {
+        add => _onSpawnAdded.Add(value);
+        remove => _onSpawnAdded.Remove(value);
     }
 }
