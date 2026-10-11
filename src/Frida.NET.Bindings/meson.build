@@ -42,12 +42,13 @@ copy_bindings = custom_target('copy-bindings',
 
 build_library_bindings = custom_target(
   'build-library-bindings',
+  build_by_default: true,
   input: [
     files(
       'Frida.NET.Bindings.csproj'
     )
   ],
-  output: 'Frida.NET.Bindings.1.0.0.nupkg',
+  output: 'Frida.NET.Bindings.' + meson.project_version() + '.nupkg',
   depends: [copy_bindings],
   command: [
     'dotnet',

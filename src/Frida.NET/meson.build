@@ -40,12 +40,13 @@ generate_wrappers = custom_target('generate-wrappers',
 
 build_library = custom_target(
   'build-library',
+  build_by_default: true,
   input: [
     files(
       'Frida.NET.csproj'
     )
   ],
-  output: 'Frida.NET.1.0.0.nupkg',
+  output: 'Frida.NET.' + meson.project_version() + '.nupkg',
   depends: [build_library_bindings, generate_wrappers],
   command: [
     'dotnet',
