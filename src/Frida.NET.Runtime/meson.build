@@ -24,8 +24,6 @@ frida_dll = shared_library(
   kwargs: frida_dll_kwargs
 )
 
-library_runtime_output = 'Frida.NET.Runtime.' + meson.project_version() + '.nupkg'
-
 host_cpu = host_machine.cpu_family()
 host_os = host_machine.system()
 
@@ -49,8 +47,22 @@ elif host_os == 'darwin'
   dotnet_platform = host_cpu == 'x86_64' ? 'macos-x86_64' : 'macos-arm64'
 endif
 
+rid = {
+  'win-x86': 'win-x86',
+  'win-x86_64': 'win-x64',
+  'macos-x86_64': 'osx-x64',
+  'macos-arm64': 'osx-arm64',
+  'linux-x86': 'linux-x86',
+  'linux-x86_64': 'linux-x64',
+  'linux-armhf': 'linux-arm32',
+  'linux-arm64': 'linux-arm64',
+  'linux-mips64': 'linux-mips64',
+}[dotnet_platform]
+library_runtime_output = 'Frida.NET.Runtime.' + rid + '.' + meson.project_version() + '.nupkg'
+
 build_library_runtime = custom_target(
   'build-runtime',
+  build_by_default: true,
   input: [
     fs.copyfile('Frida.NET.Runtime.csproj', 'Frida.NET.Runtime.csproj')
   ],
