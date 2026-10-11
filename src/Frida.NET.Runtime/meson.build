@@ -19,6 +19,7 @@ wrapper_sources = files('frida-wrapper.c')
 
 frida_dll = shared_library(
   'Frida',
+  name_prefix: '',
   wrapper_sources,
   dependencies: [ frida_core_dep ],
   vs_module_defs: vs_module_defs
