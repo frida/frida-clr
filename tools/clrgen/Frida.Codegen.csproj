@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Frida.Codegen</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\gir.core\src\Generation\GirLoader\GirLoader.csproj" />
+    <ProjectReference Include="..\..\gir.core\src\Generation\GirModel\GirModel.csproj" />
+  </ItemGroup>
+
+</Project>
