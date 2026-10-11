@@ -1,3 +1,4 @@
+using System.Dynamic;
 using System.Text.Json;
 using Frida.Events;
 using Frida.Helpers;
@@ -10,6 +11,9 @@ public partial class FridaScript
     private readonly Dictionary<long, TaskCompletionSource<JsonElement>> _pendingCalls = new();
     private long _nextCallId = 1;
     private LazyEvent<ScriptMessageEventArgs> _onMessage = null!;
+    private ScriptExports _exports = null!;
+
+    public dynamic Exports => _exports;
 
     public Task<JsonElement> Call(string method, params object?[] args)
     {
@@ -35,6 +39,7 @@ public partial class FridaScript
 
     partial void OnConstructed()
     {
+        _exports = new ScriptExports(this);
         _onMessage = new LazyEvent<ScriptMessageEventArgs>(
             _ => _script.OnMessage += HandleMessage,
             _ => _script.OnMessage -= HandleMessage);
@@ -100,5 +105,26 @@ public partial class FridaScript
     {
         add => _onMessage.Add(value);
         remove => _onMessage.Remove(value);
+    }
+
+    private sealed class ScriptExports : DynamicObject
+    {
+        private readonly FridaScript _owner;
+
+        public ScriptExports(FridaScript owner)
+        {
+            _owner = owner;
+        }
+
+        public override bool TryInvokeMember(InvokeMemberBinder binder, object?[]? args, out object? result)
+        {
+            result = _owner.Call(ToCamelCase(binder.Name), args ?? System.Array.Empty<object?>());
+            return true;
+        }
+
+        private static string ToCamelCase(string name)
+        {
+            return char.ToLowerInvariant(name[0]) + name[1..];
+        }
     }
 }
