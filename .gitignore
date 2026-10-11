@@ -9,3 +9,4 @@ bin
 *.user
 src/Frida.NET.Bindings/Internal
 src/Frida.NET.Bindings/Public
+src/Frida.NET/Generated
