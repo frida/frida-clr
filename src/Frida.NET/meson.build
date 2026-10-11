@@ -1,8 +1,13 @@
 fs = import('fs')
 
 exe_suffix = host_machine.system() == 'windows' ? '.exe' : ''
-gir_files_platform = host_machine.system() == 'windows' ? 'windows' \
-  : (host_machine.system() == 'darwin' ? 'macos' : 'linux')
+if host_machine.system() == 'windows'
+  gir_files_platform = 'windows'
+elif host_machine.system() == 'darwin'
+  gir_files_platform = 'macos'
+else
+  gir_files_platform = 'linux'
+endif
 gir_files_dir = meson.project_source_root() / 'gir.core' / 'ext' / 'gir-files' / gir_files_platform
 
 clrgen = custom_target('build-clr-generator',
