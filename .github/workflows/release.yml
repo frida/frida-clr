@@ -1,0 +1,108 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        host:
+          - windows-x86
+          - windows-x86_64
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: .\configure.bat --host=${{ matrix.host }}
+      - run: .\make.bat
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages-${{ matrix.host }}
+          path: build/**/*.nupkg
+
+  macos:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        host:
+          - macos-x86_64
+          - macos-arm64
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: ./configure --host=${{ matrix.host }}
+      - run: make
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages-${{ matrix.host }}
+          path: build/**/*.nupkg
+
+  linux:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        host:
+          - linux-x86
+          - linux-x86_64
+          - linux-armhf
+          - linux-arm64
+          - linux-mips64
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: ./configure --host=${{ matrix.host }}
+      - run: make
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages-${{ matrix.host }}
+          path: build/**/*.nupkg
+
+  publish:
+    needs:
+      - windows
+      - macos
+      - linux
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: packages-*
+          path: packages
+          merge-multiple: true
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      - run: >
+          dotnet nuget push "packages/**/*.nupkg"
+          --api-key ${{ secrets.NUGET_API_KEY }}
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate
