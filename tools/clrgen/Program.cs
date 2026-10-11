@@ -76,8 +76,7 @@ static void EmitAll(Namespace frida, string outDir)
 
 static bool ShouldGenerate(Class cls)
     => !WrapperEmitter.IsFridaList(cls)
-    && !cls.Name.EndsWith("Options")
-    && !CustomMembers.IsFullyCustom(cls.Name);
+    && !cls.Name.EndsWith("Options");
 
 static string Pascal(string name)
     => string.Concat(name.Split('_', '-').Where(p => p.Length > 0).Select(p => char.ToUpperInvariant(p[0]) + p[1..]));
