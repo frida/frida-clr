@@ -24,4 +24,25 @@
     <None Remove="meson.build" />
   </ItemGroup>
 
+  <ItemGroup>
+    <RuntimePackageRid Include="win-x86;win-x64;osx-x64;osx-arm64;linux-x86;linux-x64;linux-arm32;linux-arm64;linux-mips64" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackRuntimeManifest</TargetsForTfmSpecificContentInPackage>
+  </PropertyGroup>
+
+  <Target Name="PackRuntimeManifest">
+    <PropertyGroup>
+      <RuntimeManifestEntries>@(RuntimePackageRid->'&quot;%(Identity)&quot;:{&quot;Frida.NET&quot;:{&quot;Frida.NET.Runtime.%(Identity)&quot;:&quot;$(PackageVersion)&quot;}}', ',')</RuntimeManifestEntries>
+      <RuntimeManifestPath>$(IntermediateOutputPath)runtime.json</RuntimeManifestPath>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(RuntimeManifestPath)" Lines="{&quot;runtimes&quot;:{$(RuntimeManifestEntries)}}" Overwrite="true" />
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(RuntimeManifestPath)">
+        <PackagePath>runtime.json</PackagePath>
+      </TfmSpecificPackageFile>
+    </ItemGroup>
+  </Target>
+
 </Project>
