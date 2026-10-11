@@ -52,6 +52,10 @@ internal static class WrapperEmitter
         foreach (var signal in signals.Where(s => !custom.Signals.Contains(s.Name)))
             EmitSignalHandler(writer, cls, signal, field);
 
+        writer.Line("partial void OnConstructed();");
+        writer.Line("partial void OnDispose();");
+        writer.Blank();
+
         EmitDispose(writer, field, signals);
 
         foreach (var signal in signals)
@@ -74,6 +78,7 @@ internal static class WrapperEmitter
             writer.Line($"    _ => {field}.{lowLevelEvent} += {handler},");
             writer.Line($"    _ => {field}.{lowLevelEvent} -= {handler});");
         }
+        writer.Line("OnConstructed();");
         writer.Close();
         writer.Blank();
     }
@@ -258,6 +263,7 @@ internal static class WrapperEmitter
         writer.Close();
         writer.Blank();
         writer.Line("_disposed = true;");
+        writer.Line("OnDispose();");
         foreach (var signal in signals)
             writer.Line($"{EventField(signal)}.Dispose();");
         writer.Line($"{field}.Dispose();");
@@ -546,11 +552,17 @@ internal static class WrapperEmitter
 
     private static IEnumerable<OptionField> OptionFields(Class options)
     {
-        foreach (var property in options.Properties.Where(p => p.Writeable))
+        var seen = new HashSet<string>();
+        for (Class? cls = options; cls != null && cls.Namespace.Name == "Frida"; cls = cls.Parent)
         {
-            var field = DescribeOptionField(property);
-            if (field != null)
-                yield return field;
+            foreach (var property in cls.Properties.Where(p => p.Writeable))
+            {
+                if (!seen.Add(property.Name))
+                    continue;
+                var field = DescribeOptionField(property);
+                if (field != null)
+                    yield return field;
+            }
         }
     }
 
@@ -648,12 +660,7 @@ internal record CustomMembers(IReadOnlySet<string> Signals, IReadOnlySet<string>
 {
     public static CustomMembers For(string className) => className switch
     {
+        "Script" => new CustomMembers(new HashSet<string> { "message" }, new HashSet<string> { "post" }),
         _ => new CustomMembers(new HashSet<string>(), new HashSet<string>()),
-    };
-
-    public static bool IsFullyCustom(string className) => className switch
-    {
-        "Script" or "Compiler" => true,
-        _ => false,
     };
 }
