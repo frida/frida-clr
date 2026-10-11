@@ -78,6 +78,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install cross toolchain
+        run: |
+          case "${{ matrix.host }}" in
+            linux-x86) pkgs="gcc-multilib g++-multilib" ;;
+            linux-armhf) pkgs="gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf" ;;
+            linux-mips64) pkgs="gcc-mips64-linux-gnuabi64 g++-mips64-linux-gnuabi64" ;;
+            *) pkgs="" ;;
+          esac
+          if [ -n "$pkgs" ]; then sudo apt-get update && sudo apt-get install -y $pkgs; fi
       - run: ./configure --host=${{ matrix.host }}
       - run: make
       - uses: actions/upload-artifact@v4
