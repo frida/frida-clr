@@ -119,6 +119,10 @@ jobs:
       - linux
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
+    environment: production
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -128,8 +132,12 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
+      - uses: NuGet/login@v1
+        id: login
+        with:
+          user: oleavr
       - run: >
           dotnet nuget push "packages/**/*.nupkg"
-          --api-key ${{ secrets.NUGET_API_KEY }}
+          --api-key ${{ steps.login.outputs.NUGET_API_KEY }}
           --source https://api.nuget.org/v3/index.json
           --skip-duplicate
