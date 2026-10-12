@@ -15,7 +15,7 @@ public partial class FridaScript
 
     public dynamic Exports => _exports;
 
-    public Task<JsonElement> Call(string method, params object?[] args)
+    private Task<JsonElement> Call(string method, params object?[] args)
     {
         var completion = new TaskCompletionSource<JsonElement>(TaskCreationOptions.RunContinuationsAsynchronously);
 
