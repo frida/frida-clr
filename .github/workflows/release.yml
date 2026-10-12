@@ -50,6 +50,23 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install signing certificate
+        env:
+          CERTIFICATES_P12: ${{ secrets.APPLE_CERTIFICATES_P12 }}
+          CERTIFICATES_PASSWORD: ${{ secrets.APPLE_CERTIFICATES_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
+        run: |
+          CERTIFICATE_PATH=$RUNNER_TEMP/apple-certificates.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/frida-signing.keychain-db
+          echo -n "$CERTIFICATES_P12" | base64 --decode --output $CERTIFICATE_PATH
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security import $CERTIFICATE_PATH -P "$CERTIFICATES_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+          rm $CERTIFICATE_PATH
+          certid=$(security find-identity -v -p codesigning | grep "Developer ID Application: " | awk '{ print $2 }')
+          echo "MACOS_CERTID=$certid" >> $GITHUB_ENV
       - run: ./configure --host=${{ matrix.host }}
       - run: make
       - uses: actions/upload-artifact@v4
