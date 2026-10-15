@@ -42,7 +42,13 @@ if host_os == 'linux'
     dotnet_platform = 'linux-mips64'
   endif
 elif host_os == 'windows'
-  dotnet_platform = host_cpu == 'x86' ? 'win-x86' : 'win-x86_64'
+  if host_cpu == 'x86'
+    dotnet_platform = 'win-x86'
+  elif host_cpu == 'aarch64'
+    dotnet_platform = 'win-arm64'
+  else
+    dotnet_platform = 'win-x86_64'
+  endif
 elif host_os == 'darwin'
   dotnet_platform = host_cpu == 'x86_64' ? 'macos-x86_64' : 'macos-arm64'
 endif
@@ -50,6 +56,7 @@ endif
 rid = {
   'win-x86': 'win-x86',
   'win-x86_64': 'win-x64',
+  'win-arm64': 'win-arm64',
   'macos-x86_64': 'osx-x64',
   'macos-arm64': 'osx-arm64',
   'linux-x86': 'linux-x86',

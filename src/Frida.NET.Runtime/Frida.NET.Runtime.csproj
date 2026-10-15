@@ -69,6 +69,13 @@
     <None Include="Frida.dll" Pack="true" PackagePath="runtimes/win-x86/native" />
   </ItemGroup>
 
+  <PropertyGroup Condition="'$(Platform)' == 'win-arm64'">
+    <PackageId>Frida.NET.Runtime.win-arm64</PackageId>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(Platform)' == 'win-arm64'">
+    <None Include="Frida.dll" Pack="true" PackagePath="runtimes/win-arm64/native" />
+  </ItemGroup>
+
   <PropertyGroup Condition="'$(Platform)' == 'macos-x86_64'">
     <PackageId>Frida.NET.Runtime.osx-x64</PackageId>
   </PropertyGroup>
