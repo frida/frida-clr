@@ -20,6 +20,7 @@ jobs:
         host:
           - windows-x86
           - windows-x86_64
+          - windows-arm64
     steps:
       - uses: actions/checkout@v4
         with:
