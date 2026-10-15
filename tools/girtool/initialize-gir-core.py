@@ -1,4 +1,5 @@
 import argparse
+import os
 import subprocess
 from os import PathLike
 from typing import Optional
@@ -7,6 +8,12 @@ from typing import Optional
 def main(gir_scripts: PathLike,
          gir_src: PathLike,
          dummy_output_file: Optional[PathLike]) -> None:
+    # These generators run on the build machine, so they must target its native
+    # architecture. When cross-compiling for a Windows x86 host, frida's
+    # environment carries Platform=x86, which makes MSBuild emit an x86 apphost
+    # that cannot load the x64 hostfxr. Drop it so child builds stay native.
+    os.environ.pop('Platform', None)
+
     subprocess.run(['dotnet', 'fsi', 'GenerateLibs.fsx'], cwd=gir_scripts, check=True)
     subprocess.run(['dotnet', 'build', 'GirCore.Libs.slnf'], cwd=gir_src, check=True)
 

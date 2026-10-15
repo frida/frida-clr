@@ -12,9 +12,10 @@ gir_files_dir = meson.project_source_root() / 'gir.core' / 'ext' / 'gir-files' /
 
 clrgen = custom_target('build-clr-generator',
   output: 'Frida.Codegen' + exe_suffix,
-  depends: [girinit],
+  depends: [girinit, girtool],
   command: [
-    'dotnet',
+    python,
+    run_dotnet,
     'publish',
     '-o', meson.current_build_dir(),
     '-c', 'Release',
