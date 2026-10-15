@@ -6,6 +6,11 @@ on:
       - '*'
   workflow_dispatch:
 
+env:
+  # The gir.core codegen tools still target net9.0; let them run on the
+  # installed .NET 10 runtime so CI needs only the one SDK.
+  DOTNET_ROLL_FORWARD: Major
+
 jobs:
   windows:
     runs-on: windows-latest
@@ -21,7 +26,7 @@ jobs:
           submodules: recursive
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -46,7 +51,7 @@ jobs:
           submodules: recursive
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -91,7 +96,7 @@ jobs:
           submodules: recursive
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -131,7 +136,7 @@ jobs:
           merge-multiple: true
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
       - uses: NuGet/login@v1
         id: login
         with:
