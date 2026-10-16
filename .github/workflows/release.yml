@@ -21,16 +21,16 @@ jobs:
           - { host: windows-x86,    sys: MINGW32,    pkg: mingw-w64-i686-gcc }
           - { host: windows-x86_64, sys: UCRT64,     pkg: mingw-w64-ucrt-x86_64-gcc }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version: 'stable'
       - name: Install MinGW toolchain for cgo support
@@ -43,7 +43,7 @@ jobs:
         env:
           MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
       - run: .\make.bat
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: packages-${{ matrix.host }}
           path: build/**/*.nupkg
@@ -51,16 +51,16 @@ jobs:
   windows-arm64:
     runs-on: windows-11-arm
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version: 'stable'
       - name: Install MinGW toolchain for cgo support
@@ -73,7 +73,7 @@ jobs:
         env:
           MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
       - run: .\make.bat
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: packages-windows-arm64
           path: build/**/*.nupkg
@@ -87,16 +87,16 @@ jobs:
           - macos-x86_64
           - macos-arm64
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version: 'stable'
       - name: Install signing certificate
@@ -118,7 +118,7 @@ jobs:
           echo "MACOS_CERTID=$certid" >> $GITHUB_ENV
       - run: ./configure --host=${{ matrix.host }} -- -Dfrida-core:compiler_backend=enabled
       - run: make
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: packages-${{ matrix.host }}
           path: build/**/*.nupkg
@@ -135,16 +135,16 @@ jobs:
           - linux-arm64
           - linux-mips64
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version: 'stable'
       - name: Configure
@@ -164,7 +164,7 @@ jobs:
             ./configure --host="$host" -- -Dfrida-core:compiler_backend=enabled
           fi
       - run: make
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: packages-${{ matrix.host }}
           path: build/**/*.nupkg
@@ -182,12 +182,12 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: packages-*
           path: packages
           merge-multiple: true
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
       - uses: NuGet/login@v1
