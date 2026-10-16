@@ -17,10 +17,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        host:
-          - windows-x86
-          - windows-x86_64
-          - windows-arm64
+        include:
+          - { host: windows-x86,    sys: MINGW32,    pkg: mingw-w64-i686-gcc }
+          - { host: windows-x86_64, sys: UCRT64,     pkg: mingw-w64-ucrt-x86_64-gcc }
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,11 +30,52 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: .\configure.bat --host=${{ matrix.host }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+      - name: Install MinGW toolchain for cgo support
+        id: msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.sys }}
+          install: ${{ matrix.pkg }}
+      - run: .\configure.bat --host=${{ matrix.host }} -- "-Dfrida-core:compiler_backend=enabled"
+        env:
+          MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
       - run: .\make.bat
       - uses: actions/upload-artifact@v4
         with:
           name: packages-${{ matrix.host }}
+          path: build/**/*.nupkg
+
+  windows-arm64:
+    runs-on: windows-11-arm
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+      - name: Install MinGW toolchain for cgo support
+        id: msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: CLANGARM64
+          install: mingw-w64-clang-aarch64-clang
+      - run: .\configure.bat --host=windows-arm64 -- "-Dfrida-core:compiler_backend=enabled"
+        env:
+          MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
+      - run: .\make.bat
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages-windows-arm64
           path: build/**/*.nupkg
 
   macos:
@@ -56,6 +96,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
       - name: Install signing certificate
         env:
           CERTIFICATES_P12: ${{ secrets.APPLE_CERTIFICATES_P12 }}
@@ -73,7 +116,7 @@ jobs:
           rm $CERTIFICATE_PATH
           certid=$(security find-identity -v -p codesigning | grep "Developer ID Application: " | awk '{ print $2 }')
           echo "MACOS_CERTID=$certid" >> $GITHUB_ENV
-      - run: ./configure --host=${{ matrix.host }}
+      - run: ./configure --host=${{ matrix.host }} -- -Dfrida-core:compiler_backend=enabled
       - run: make
       - uses: actions/upload-artifact@v4
         with:
@@ -101,6 +144,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
       - name: Configure
         run: |
           case "${{ matrix.host }}" in
@@ -111,7 +157,12 @@ jobs:
             *) host="${{ matrix.host }}"; pkgs="" ;;
           esac
           if [ -n "$pkgs" ]; then sudo apt-get update && sudo apt-get install -y $pkgs; fi
-          ./configure --host="$host"
+          # mips64 lacks Go cgo cross support, so let it fall back to auto
+          if [ "${{ matrix.host }}" = "linux-mips64" ]; then
+            ./configure --host="$host"
+          else
+            ./configure --host="$host" -- -Dfrida-core:compiler_backend=enabled
+          fi
       - run: make
       - uses: actions/upload-artifact@v4
         with:
@@ -121,6 +172,7 @@ jobs:
   publish:
     needs:
       - windows
+      - windows-arm64
       - macos
       - linux
     runs-on: ubuntu-latest
